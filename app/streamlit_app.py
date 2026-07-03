@@ -33,15 +33,11 @@ st.set_page_config(
     layout="wide",
 )
 
-st.markdown(
-    """
+with open(PROJECT_ROOT / 'app' / 'style.css', 'r', encoding='utf-8') as css_file:
+    css = css_file.read()
+st.markdown(f"""
     <style>
-    .block-container {padding-top: 1.6rem; padding-bottom: 3rem;}
-    h1 {font-size:2.05rem !important; line-height:1.25 !important;}
-    [data-testid="stMetric"] {background:#ffffff; border:1px solid #e5e3dd; padding:14px; border-radius:12px;}
-    [data-testid="stMetricValue"] {font-size:1.55rem;}
-    .risk-banner {padding:14px 18px; border-radius:12px; background:#e6f1fb; border:1px solid #b5d4f4; margin-bottom:16px;}
-    .small-note {font-size:.82rem; color:#666;}
+    {css}
     </style>
     """,
     unsafe_allow_html=True,
@@ -62,8 +58,8 @@ agent = load_agent()
 store = load_store()
 panel = store.panel.copy()
 
-st.title("🚘 자동차 부품업계 리스크 분석 에이전트")
-st.caption("DART 재무데이터 × 거시경제지표 | 21개 기업 · 2019~2024")
+def _format_stat(value: float | None, suffix: str = "") -> str:
+    return "N/A" if value is None else f"{value:,.1f}{suffix}"
 
 with st.sidebar:
     st.header("분석 설정")
@@ -79,20 +75,51 @@ with st.sidebar:
 current = agent.store.company_row(corp_name, int(selected_year))
 current_risk = get_current_risk(corp_name, int(selected_year))
 
+hero_metrics = {
+    "부채비율": _format_stat(current_risk["metrics"].get("debt_ratio"), "%"),
+    "유동비율": _format_stat(current_risk["metrics"].get("current_ratio")),
+    "영업이익률": _format_stat(current_risk["metrics"].get("op_margin"), "%"),
+    "Z-score": _format_stat(current_risk["metrics"].get("z_score")),
+}
+hero_grade = current_risk["z_grade"]
+hero_flags = ", ".join(current_risk["risk_flags"]) or "주요 경고 없음"
+
+st.markdown(
+    f"""
+    <section class="hero-shell">
+        <div class="hero-copy">
+            <div class="hero-eyebrow">Auto Risk Agent</div>
+            <h1 class="hero-title">자동차 부품업계 리스크를 더 빠르고 단정하게 파악하세요</h1>
+            <p class="hero-lead">DART 재무 데이터와 거시 지표를 통합 분석해 기업별 위험, 시나리오 민감도, 동종 업계 비교를 한곳에서 제공합니다.</p>
+            <div class="hero-actions">
+                <a class="hero-cta hero-cta-primary" href="#overview">분석 시작</a>
+                <a class="hero-cta hero-cta-secondary" href="#report">리포트 보기</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><span>21개</span><small>기업 분석</small></div>
+                <div class="hero-stat"><span>2019–2024</span><small>데이터 기간</small></div>
+                <div class="hero-stat"><span>재무+거시</span><small>통합 분석</small></div>
+            </div>
+        </div>
+        <div class="hero-panel">
+            <div class="hero-panel-card">
+                <div class="hero-panel-tag">실시간 리스크</div>
+                <div class="hero-panel-title">{corp_name} · {selected_year}년</div>
+                <div class="hero-panel-copy">등급 <strong>{hero_grade}</strong> · {hero_flags}</div>
+                <div class="hero-panel-grid">
+                    {''.join([f'<div class="hero-card-stat"><strong>{value}</strong><span>{label}</span></div>' for label, value in hero_metrics.items()])}
+                </div>
+            </div>
+        </div>
+    </section>
+    """,
+    unsafe_allow_html=True,
+)
+
 # ── 현재 거시지표값 (챗봇 컨텍스트용) ──────────────────
 current_rate    = float(current.get("base_rate_kr", 3.0))
 current_usdkrw  = float(current.get("usd_krw", 1300.0))
 current_wti     = float(current.get("wti_oil", 70.0))
-
-grade_color = {"안전": "#1D9E75", "주의": "#A15418", "위험": "#C0392B"}.get(
-    current_risk["z_grade"], "#5B5A57"
-)
-st.markdown(
-    f'<div class="risk-banner"><b>{corp_name} · {selected_year}년</b> '
-    f'Z-score 등급: <span style="color:{grade_color};font-weight:700">{current_risk["z_grade"]}</span>'
-    f'<br><span class="small-note">{", ".join(current_risk["risk_flags"]) or "주요 경고 없음"}</span></div>',
-    unsafe_allow_html=True,
-)
 
 metric_columns = st.columns(5)
 for column, (name, label) in zip(metric_columns, RISK_LABELS.items()):
@@ -180,11 +207,70 @@ with scenario_tab:
             st.error(str(exc))
     scenario_result = st.session_state.get("scenario_result")
     if scenario_result and scenario_result["corp_name"] == corp_name:
+        applied = scenario_result["applied_scenario"]
+        if applied:
+            st.markdown("### 적용된 시나리오")
+            applied_cols = st.columns(len(applied))
+            for col, (feature, item) in zip(applied_cols, applied.items()):
+                change = item["after"] - item["before"]
+                change_pct = (change / abs(item["before"]) * 100) if item["before"] != 0 else None
+                delta_text = f"{change:+.2f}"
+                if change_pct is not None:
+                    delta_text += f" ({change_pct:+.1f}%)"
+                col.metric(item["label"], f"{item['after']:.2f}", delta_text)
+                col.caption(f"기준 {item['before']:.2f} → 관측 {item['observed_range'][0]:.1f}~{item['observed_range'][1]:.1f}")
+
+        st.markdown("### 시나리오 리스크 결과")
+        summary_cols = st.columns(len(scenario_result["predictions"]))
+        for col, (target, item) in zip(summary_cols, scenario_result["predictions"].items()):
+            direction = "positive" if item["delta"] > 0 else "negative" if item["delta"] < 0 else "neutral"
+            highlight = " scenario-card-highlight" if target == "current_ratio" else ""
+            delta_pct = item["delta_pct"]
+            delta_label = f"{item['delta']:+.2f}"
+            if delta_pct is not None:
+                delta_label += f" ({delta_pct:+.1f}%)"
+            col.markdown(
+                f"""
+                <div class="scenario-card scenario-card-{direction}{highlight}">
+                    <div class="scenario-card-label">{item['label']}</div>
+                    <div class="scenario-card-value">{item['scenario']:.2f}</div>
+                    <div class="scenario-card-delta">{delta_label}</div>
+                    <div class="scenario-card-subtitle">기준 {item['baseline']:.2f} → 시나리오 {item['scenario']:.2f}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        max_name, max_item = max(
+            scenario_result["predictions"].items(),
+            key=lambda pair: abs(pair[1]["delta"]),
+        )
+        max_delta = max_item["delta"]
+        max_pct = max_item["delta_pct"]
+        st.markdown(
+            f"""
+            <div class='scenario-highlight'>
+                <div class='scenario-highlight-label'>가장 큰 변화</div>
+                <div class='scenario-highlight-value'>{max_item['label']} {max_delta:+.2f} ({max_pct:+.1f}%)</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
         rows = [
-            {"지표": item["label"], "기준": item["baseline"], "시나리오": item["scenario"], "변화": item["delta"]}
+            {
+                "지표": item["label"],
+                "기준": item["baseline"],
+                "시나리오": item["scenario"],
+                "변화": item["delta"],
+                "변화(%)": item["delta_pct"],
+            }
             for item in scenario_result["predictions"].values()
         ]
-        st.dataframe(pd.DataFrame(rows).style.format({"기준": "{:.2f}", "시나리오": "{:.2f}", "변화": "{:+.2f}"}), use_container_width=True, hide_index=True)
+        styled = pd.DataFrame(rows).style.format(
+            {"기준": "{:.2f}", "시나리오": "{:.2f}", "변화": "{:+.2f}", "변화(%)": "{:+.1f}%"}
+        )
+        st.dataframe(styled, use_container_width=True, hide_index=True)
 
 with peer_tab:
     left, right = st.columns(2)
