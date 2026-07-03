@@ -221,10 +221,14 @@ with scenario_tab:
                 col.caption(f"기준 {item['before']:.2f} → 관측 {item['observed_range'][0]:.1f}~{item['observed_range'][1]:.1f}")
 
         st.markdown("### 시나리오 리스크 결과")
+        max_name, max_item = max(
+            scenario_result["predictions"].items(),
+            key=lambda pair: abs(pair[1]["delta"]),
+        )
         summary_cols = st.columns(len(scenario_result["predictions"]))
         for col, (target, item) in zip(summary_cols, scenario_result["predictions"].items()):
             direction = "positive" if item["delta"] > 0 else "negative" if item["delta"] < 0 else "neutral"
-            highlight = " scenario-card-highlight" if target == "current_ratio" else ""
+            highlight = " scenario-card-highlight" if target == max_name else ""
             delta_pct = item["delta_pct"]
             delta_label = f"{item['delta']:+.2f}"
             if delta_pct is not None:
@@ -240,37 +244,6 @@ with scenario_tab:
                 """,
                 unsafe_allow_html=True,
             )
-
-        max_name, max_item = max(
-            scenario_result["predictions"].items(),
-            key=lambda pair: abs(pair[1]["delta"]),
-        )
-        max_delta = max_item["delta"]
-        max_pct = max_item["delta_pct"]
-        st.markdown(
-            f"""
-            <div class='scenario-highlight'>
-                <div class='scenario-highlight-label'>가장 큰 변화</div>
-                <div class='scenario-highlight-value'>{max_item['label']} {max_delta:+.2f} ({max_pct:+.1f}%)</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        rows = [
-            {
-                "지표": item["label"],
-                "기준": item["baseline"],
-                "시나리오": item["scenario"],
-                "변화": item["delta"],
-                "변화(%)": item["delta_pct"],
-            }
-            for item in scenario_result["predictions"].values()
-        ]
-        styled = pd.DataFrame(rows).style.format(
-            {"기준": "{:.2f}", "시나리오": "{:.2f}", "변화": "{:+.2f}", "변화(%)": "{:+.1f}%"}
-        )
-        st.dataframe(styled, use_container_width=True, hide_index=True)
 
 with peer_tab:
     left, right = st.columns(2)

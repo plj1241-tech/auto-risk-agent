@@ -270,8 +270,9 @@ section > div[data-testid="stVerticalBlock"] > div + div {
 }
 
 .scenario-card-highlight {
-    border-color: #93c5fd !important;
+    border: 2px solid #2563eb !important;
     background: #eff6ff !important;
+    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.14);
 }
 
 .hero-shell {
