@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>자동차 부품업계 리스크 분석 에이전트 — 팀 현황 공유</title>
+<style>
+  :root {
+    --navy: #0C447C;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --orange: #A15418;
+    --orange-light: #FAEEDA;
+    --red: #712B13;
+    --red-light: #FAECE7;
+    --gray-text: #5B5A57;
+    --gray-light: #F4F3EF;
+    --border: #E5E3DD;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+    color: #2B2A28;
+    background: #FAFAF8;
+    line-height: 1.6;
+    padding: 0;
+  }
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* Header */
+  .doc-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    border-radius: 16px;
+    padding: 32px 36px;
+    color: white;
+    margin-bottom: 28px;
+  }
+  .doc-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .doc-header .subtitle {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-bottom: 18px;
+  }
+  .meta-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .meta-chip {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11.5px;
+  }
+
+  .progress-section {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 28px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--gray-text);
+    margin-bottom: 8px;
+  }
+  .progress-label strong { color: var(--green); font-weight: 600; font-size: 15px;}
+  .progress-track {
+    height: 10px;
+    background: var(--gray-light);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 10px;
+    background: linear-gradient(90deg, var(--green), #2BB888);
+    border-radius: 5px;
+    width: 96%;
+  }
+  .status-banner {
+    background: var(--green-light);
+    border: 1px solid #9FE1CB;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: #085041;
+  }
+
+  /* Section headers */
+  h2.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 36px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--blue-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2.section-title .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    background: var(--blue);
+    color: white;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* History timeline */
+  .timeline {
+    position: relative;
+    padding-left: 4px;
+  }
+  .hist-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 4px;
+  }
+  .hist-dot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 16px;
+  }
+  .hist-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    margin-top: 4px;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px currentColor;
+  }
+  .hist-dot.done { color: var(--green); background: var(--green); }
+  .hist-dot.issue { color: #D85A30; background: #D85A30; }
+  .hist-dot.current { color: var(--blue); background: var(--blue); }
+  .hist-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    margin: 4px 0;
+    min-height: 22px;
+  }
+  .hist-content {
+    flex: 1;
+    padding-bottom: 22px;
+  }
+  .hist-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #2B2A28;
+    margin-bottom: 4px;
+  }
+  .hist-desc {
+    font-size: 12.5px;
+    color: var(--gray-text);
+    line-height: 1.6;
+  }
+  .hist-issue-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--orange);
+    background: var(--orange-light);
+    border-radius: 10px;
+    padding: 3px 10px;
+    margin-top: 6px;
+  }
+
+  /* Roadmap phase cards */
+  .phase-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .phase-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--gray-light);
+  }
+  .phase-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .badge-done { background: var(--green-light); color: #085041; }
+  .badge-now { background: var(--blue-light); color: var(--navy); }
+  .badge-todo { background: #E8E7E2; color: #8C8A84; }
+  .phase-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2B2A28;
+  }
+  .phase-body {
+    padding: 14px 18px;
+  }
+  .task-row {
+    display: flex;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 12.5px;
+    color: #2B2A28;
+    align-items: flex-start;
+  }
+  .task-icon {
+    flex-shrink: 0;
+    width: 16px;
+    margin-top: 1px;
+    font-size: 13px;
+  }
+  .task-icon.done { color: var(--green); }
+  .task-icon.todo { color: #C4C2BC; }
+  .pill {
+    font-size: 10.5px;
+    font-family: "SF Mono", Consolas, monospace;
+    background: var(--gray-light);
+    border: 1px solid var(--border);
+    padding: 1px 7px;
+    border-radius: 8px;
+    color: var(--gray-text);
+  }
+
+  /* Role grid */
+  .role-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .role-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .role-label {
+    font-size: 10.5px;
+    color: #A09E97;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+  }
+  .role-name {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .role-task {
+    font-size: 12.5px;
+    color: var(--gray-text);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+  .role-status {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+  }
+
+  /* Todo cards */
+  .todo-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+  }
+  .todo-card.priority {
+    border-color: #F0C896;
+    background: #FFFBF3;
+  }
+  .todo-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .todo-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #2B2A28;
+  }
+  .todo-tag {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-left: 12px;
+  }
+  .tag-high { background: var(--red-light); color: var(--red); }
+  .tag-mid { background: var(--orange-light); color: var(--orange); }
+  .tag-low { background: var(--gray-light); color: #A09E97; }
+  .todo-desc {
+    font-size: 12.5px;
+    color: var(--gray-text);
+    line-height: 1.65;
+  }
+
+  /* Metrics table */
+  table.metrics {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 12.5px;
+  }
+  table.metrics th {
+    background: var(--navy);
+    color: white;
+    padding: 9px 14px;
+    text-align: left;
+    font-weight: 600;
+  }
+  table.metrics td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    color: #2B2A28;
+  }
+  table.metrics tr:nth-child(even) { background: var(--gray-light); }
+  table.metrics .good { color: var(--green); font-weight: 600; }
+  table.metrics .bad { color: #C0392B; font-weight: 600; }
+  table.metrics .warn { color: var(--orange); font-weight: 600; }
+
+  /* Validation summary */
+  .validation-banner {
+    background: var(--red-light);
+    border: 1px solid #E7B5A5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: var(--red);
+    font-size: 12.5px;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .validation-banner strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+  .validation-banner.signal {
+    background: var(--green-light);
+    border-color: #9FE1CB;
+    color: #085041;
+  }
+  .validation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .validation-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .validation-card h3 {
+    color: var(--navy);
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .validation-card p {
+    color: var(--gray-text);
+    font-size: 12px;
+    line-height: 1.65;
+  }
+  .metrics-note {
+    color: var(--gray-text);
+    font-size: 11.5px;
+    margin-top: -6px;
+  }
+
+  /* Analysis artifacts */
+  .artifact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 14px 0 22px;
+  }
+  .artifact-card {
+    display: block;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    color: var(--navy);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .artifact-card img {
+    width: 100%;
+    height: 210px;
+    object-fit: contain;
+    background: #FAFAF8;
+    border-radius: 6px;
+    margin-bottom: 7px;
+  }
+  .artifact-link {
+    display: inline-block;
+    margin: 3px 8px 8px 0;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--blue);
+    background: white;
+    text-decoration: none;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .csv-block {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin: 14px 0;
+    overflow-x: auto;
+  }
+  .csv-block h3 { color: var(--navy); font-size: 13px; margin-bottom: 8px; }
+  table.csv-table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  table.csv-table th { background: var(--navy); color: white; padding: 6px 8px; white-space: nowrap; }
+  table.csv-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.csv-table tr:nth-child(even) { background: var(--gray-light); }
+
+  .footer-note {
+    text-align: center;
+    font-size: 11.5px;
+    color: #A09E97;
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media print {
+    body { background: white; }
+    .page { max-width: 100%; padding: 10px; }
+    .validation-grid { break-inside: avoid; }
+    .artifact-card img { height: 150px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="doc-header">
+    <h1>자동차 부품업계 리스크 분석 에이전트</h1>
+    <div class="subtitle">거시경제지표 × DART 기업데이터 기반 리스크 분석 — 팀 현황 공유 리포트</div>
+    <div class="meta-chips">
+      <span class="meta-chip">📦 21개 기업</span>
+      <span class="meta-chip">📅 2019~2024 (6개년)</span>
+      <span class="meta-chip">📊 패널 125행 × 32열</span>
+      <span class="meta-chip">💰 무료 API만 사용</span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>전체 진행률</span>
+      <strong>96%</strong>
+    </div>
+    <div class="progress-track"><div class="progress-fill"></div></div>
+    <div class="status-banner">
+      ✓ Phase 1~4 완료. Phase 5 대시보드·PDF·발표자료 및 로컬 통합검증 완료. 실제 Cloud 배포만 남음.
+    </div>
+  </div>
+
+  <!-- 1. HISTORY -->
+  <h2 class="section-title"><span class="num">1</span>진행 히스토리</h2>
+  <div class="timeline">
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">환경 세팅 &amp; API 키 발급</div>
+        <div class="hist-desc">DART·ECOS·FRED·Gemini 4종 무료 키 발급. VS Code CMD 환경, 폴더구조, .env 설정.</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">DART 수집기 1차 (5개사, 연간)</div>
+        <div class="hist-desc">현대모비스·HL만도·평화산업·한온시스템·서연이화 5개사 2019~2024 연간 재무제표 수집.</div>
+        <div class="hist-issue-tag">⚠ corp_code 오류 다수, 계정과목명 기업마다 상이 → ACCOUNT_MAP 보강하여 해결</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">거시지표 수집기 (ECOS+FRED)</div>
+        <div class="hist-desc">기준금리·환율·미국금리·PPI·유가·철광석 6종 수집.</div>
+        <div class="hist-issue-tag">⚠ ECOS 환율이 일간(D) 주기로만 제공됨을 확인 후 연간 평균으로 재계산</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">EDA + 1차 회귀·ML (5개사 기준)</div>
+        <div class="hist-desc">상관분석, 패널 고정효과 회귀, XGBoost+SHAP 1차 실행. 기업별 상관관계 유의미하게 확인.</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">범위 확장 결정 — 기업 20개+ · 분기 데이터</div>
+        <div class="hist-desc">"애널리스트급 리포트" 목표 설정 후, 샘플 부족 문제 해결을 위해 21개 자동차부품 상장사로 확대 결정.</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">21개사 분기 데이터 수집 (492행)</div>
+        <div class="hist-desc">DART 분기보고서 4종(1Q·반기·3Q·사업보고서) × 21개사 × 6년 = 504회 호출, 492행 확보. 손익항목 누적값→단일분기 환원 로직 적용.</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot issue"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">분기 단위 분석 시도 → 품질 저하 확인</div>
+        <div class="hist-desc">분기 패널회귀 R²=0.01 수준, XGBoost 일부 R² 음수(설명력 없음) 확인.</div>
+        <div class="hist-issue-tag">⚠ 분기 손익 노이즈가 크고 거시효과는 누적적이라 분기 단위 신호 약함 → 연간 집계로 전환 결정</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">분기→연간 재집계 (21개사, 125행)</div>
+        <div class="hist-desc">기존 분기데이터 재활용, 손익항목 합산·재무상태표 Q4값 사용. 추가 API 호출 없이 21개사 연간 패널 완성.</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">2차 회귀·ML·SHAP 완료 (21개사 기준)</div>
+        <div class="hist-desc">교정 연간 Z-score↔한국금리 β=+0.209 (p=0.005) 확인. 부채비율 로그학습과 직전값 기준선 비교를 재현 가능한 분석 스크립트에 반영.</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot done"></div><div class="hist-line"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">Phase 3·4 에이전트/API/리포트 구현 및 검증 완료</div>
+        <div class="hist-desc">도구 4종, Gemini 2.5 Flash 함수호출, 5단 애널리스트 리포트, FastAPI /analyze·/report 구현. 단위테스트 5/5, 실제 Gemini 호출, Swagger 문서, 안전·주의·위험 기업 샘플 검증 통과.</div>
+      </div>
+    </div>
+
+    <div class="hist-item">
+      <div class="hist-dot-col"><div class="hist-dot current"></div></div>
+      <div class="hist-content">
+        <div class="hist-title">Phase 5 Streamlit 대시보드·PDF 통합검증 완료 ← 현재 위치</div>
+        <div class="hist-desc">6개 탭 대시보드, 시나리오 슬라이더, 챗봇, Markdown·PDF 리포트 출력을 구현. 브라우저 렌더링과 2페이지 한글 PDF를 검증했으며 Cloud 배포 설정과 README까지 준비함.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 2. ROADMAP -->
+  <h2 class="section-title"><span class="num">2</span>로드맵</h2>
+
+  <div class="phase-card">
+    <div class="phase-head">
+      <span class="phase-badge badge-done">완료</span>
+      <span class="phase-title">Phase 1 — 데이터 파이프라인</span>
+    </div>
+    <div class="phase-body">
+      <div class="task-row"><span class="task-icon done">1</span><span>DART 분기 수집기 (21개사 × 6년 × 4분기)</span></div>
+      <div class="task-row"><span class="task-icon done">2</span><span>거시지표 6종 수집 (한국금리·환율·미국금리·PPI·유가·철광석)</span></div>
+      <div class="task-row"><span class="task-icon done">3</span><span>분기 손익 교정 → 연간 재집계 → 리스크지표 5종 + Z-score 계산</span></div>
+      <div class="task-row"><span class="task-icon done">4</span><span><span class="pill">panel_annual_v2.parquet</span> 125행×32열 완성</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-head">
+      <span class="phase-badge badge-done">완료</span>
+      <span class="phase-title">Phase 2 — 통계분석 &amp; ML 모델</span>
+    </div>
+    <div class="phase-body">
+      <div class="task-row"><span class="task-icon done">1</span><span>EDA·시계열·상관행렬·이벤트 비교</span></div>
+      <div class="task-row"><span class="task-icon done">2</span><span>패널 고정효과 회귀 (PanelOLS) 및 p값 산출</span></div>
+      <div class="task-row"><span class="task-icon done">3</span><span>XGBoost walk-forward 모델과 직전값 기준선 비교</span></div>
+      <div class="task-row"><span class="task-icon done">4</span><span>SHAP 중요도·기업별 비교·Z-score beeswarm</span></div>
+      <div class="task-row"><span class="task-icon done">5</span><span>로그 부채비율 모델 재현성과 검증 CSV 저장</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-head">
+      <span class="phase-badge badge-done">완료</span>
+      <span class="phase-title">Phase 3 — 에이전트 핵심부 (시나리오 예측 + 원인설명)</span>
+    </div>
+    <div class="phase-body">
+      <div class="task-row"><span class="task-icon done">1</span><span>도구 4종: get_current_risk · run_scenario · explain_shap · compare_peers</span></div>
+      <div class="task-row"><span class="task-icon done">2</span><span>과거 관측범위 가드레일이 적용된 시나리오 민감도 계산</span></div>
+      <div class="task-row"><span class="task-icon done">3</span><span>SHAP 기반 모델 원인 설명 + 기업 고유효과 분리</span></div>
+      <div class="task-row"><span class="task-icon done">4</span><span>Gemini 2.5 Flash 연동 — 자연어 질문 → 도구 호출 → 답변</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-head">
+      <span class="phase-badge badge-done">완료</span>
+      <span class="phase-title">Phase 4 — 리포트·API 통합 분석</span>
+    </div>
+    <div class="phase-body">
+      <div class="task-row"><span class="task-icon done">1</span><span>요약·시나리오·원인·동종비교·점검제안 5단 리포트</span></div>
+      <div class="task-row"><span class="task-icon done">2</span><span>Gemini 수치보존 프롬프트 기반 자연어 서술 자동 생성</span></div>
+      <div class="task-row"><span class="task-icon done">3</span><span>FastAPI 백엔드 (POST /analyze, /report) + Swagger 문서</span></div>
+      <div class="task-row"><span class="task-icon done">4</span><span>Markdown·한글 PDF 생성 및 출력 검증</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-head">
+      <span class="phase-badge badge-now">진행중</span>
+      <span class="phase-title">Phase 5 — 대시보드·시각화 분석</span>
+    </div>
+    <div class="phase-body">
+      <div class="task-row"><span class="task-icon done">1</span><span>기업 선택 + 리스크지표 추이 + 거시변수 오버레이</span></div>
+      <div class="task-row"><span class="task-icon done">2</span><span>시나리오 슬라이더 → 관측범위 내 민감도 계산</span></div>
+      <div class="task-row"><span class="task-icon done">3</span><span>챗봇 패널 + Markdown·PDF 리포트 다운로드</span></div>
+      <div class="task-row"><span class="task-icon done">4</span><span>Streamlit Cloud 설정, 런타임, README 준비</span></div>
+      <div class="task-row"><span class="task-icon done">5</span><span>검증 결과 중심 5장 발표자료·데모 순서</span></div>
+      <div class="task-row"><span class="task-icon todo">6</span><span>GitHub 연결 후 실제 Cloud 배포</span></div>
+    </div>
+  </div>
+
+  <!-- 3. ROLES -->
+  <h2 class="section-title"><span class="num">3</span>R&amp;R (역할 분담)</h2>
+  <p style="font-size:12.5px; color:var(--gray-text); margin-bottom:14px;">
+    현재까지 데이터·분석 파트는 1인이 진행했습니다. 남은 1주는 4개 파트로 분업을 권장합니다.
+  </p>
+  <div class="role-grid">
+    <div class="role-card">
+      <div class="role-label">담당자 A (현재 진행자)</div>
+      <div class="role-name">데이터 &amp; 분석 리드</div>
+      <div class="role-task">DART/거시 수집기, 패널구축<br>패널회귀·XGBoost·SHAP<br>모델 정확도 보완</div>
+      <span class="role-status" style="background:var(--green-light); color:#085041;">Phase 1~2 완료</span>
+    </div>
+    <div class="role-card">
+      <div class="role-label">담당자 B</div>
+      <div class="role-name">에이전트 백엔드</div>
+      <div class="role-task">도구 4종 구현<br>Gemini API 연동<br>시나리오 예측 로직</div>
+      <span class="role-status" style="background:var(--green-light); color:#085041;">Phase 3 완료</span>
+    </div>
+    <div class="role-card">
+      <div class="role-label">담당자 C</div>
+      <div class="role-name">리포트 &amp; API</div>
+      <div class="role-task">애널리스트 리포트 템플릿<br>FastAPI 엔드포인트<br>PDF 생성</div>
+      <span class="role-status" style="background:var(--green-light); color:#085041;">Phase 4 완료</span>
+    </div>
+    <div class="role-card">
+      <div class="role-label">담당자 D</div>
+      <div class="role-name">프론트 &amp; 배포</div>
+      <div class="role-task">Streamlit 대시보드<br>Streamlit Cloud 배포<br>README·발표자료</div>
+      <span class="role-status" style="background:var(--blue-light); color:var(--navy);">Phase 5 진행중</span>
+    </div>
+  </div>
+
+  <!-- 4. TODO -->
+  <h2 class="section-title"><span class="num">4</span>보완 사항 및 과제</h2>
+
+  <div class="todo-card priority">
+    <div class="todo-head">
+      <span class="todo-title">샘플 크기 한계 (n=125)</span>
+      <span class="todo-tag tag-high">중요</span>
+    </div>
+    <div class="todo-desc">21개사×6년이라 일부 회귀계수의 p값이 여전히 높음(유의하지 않음). 발표 시 "방향성 참고용"이라는 점을 명시하고, 가능하면 업종 추가 확장(타이어사 등) 고려.</div>
+  </div>
+
+  <div class="todo-card priority">
+    <div class="todo-head">
+      <span class="todo-title">이자보상배율·영업이익률 예측력 낮음 (R² 0.18~0.24)</span>
+      <span class="todo-tag tag-high">중요</span>
+    </div>
+    <div class="todo-desc">거시변수만으로는 설명력 부족. 기업 개별 요인(업종 내 포지션, 고객사 의존도 등) 피처 추가하면 개선 가능. 시간 부족하면 "거시변수의 한계"로 리포트에 솔직히 명시.</div>
+  </div>
+
+  <div class="todo-card">
+    <div class="todo-head">
+      <span class="todo-title">지속성 기준선 대비 예측력 보완</span>
+      <span class="todo-tag tag-high">중요</span>
+    </div>
+    <div class="todo-desc">관측범위 가드레일은 구현 완료. 다만 동일 표본에서 직전 연도·분기 값을 그대로 쓰는 기준선이 대부분의 XGBoost보다 높으므로 현재 모델은 예측기보다 민감도·설명 도구로 제한.</div>
+  </div>
+
+  <div class="todo-card">
+    <div class="todo-head">
+      <span class="todo-title">명신산업·캐프·화신테크 데이터 결측</span>
+      <span class="todo-tag tag-mid">보통</span>
+    </div>
+    <div class="todo-desc">상장 시기가 늦어 일부 연도 데이터 없음(n_quarters&lt;4). 현재 코드는 경고만 출력하며 패널에는 포함됨. 리포트에서 해당 기업 선택시 "데이터 제한적" 안내 필요.</div>
+  </div>
+
+  <div class="todo-card">
+    <div class="todo-head">
+      <span class="todo-title">실제 위험 결과변수 검증 부재</span>
+      <span class="todo-tag tag-high">중요</span>
+    </div>
+    <div class="todo-desc">Gemini 연동과 수치보존 프롬프트는 구현 완료. 현재 목표값은 재무비율 자체이므로 부도·등급하락·감사의견 같은 외부 사건을 예측했다고 해석할 수 없음. 향후 결과변수 라벨 검증 필요.</div>
+  </div>
+
+  <div class="todo-card">
+    <div class="todo-head">
+      <span class="todo-title">실제 Cloud 배포</span>
+      <span class="todo-tag tag-low">낮음</span>
+    </div>
+    <div class="todo-desc">PDF·README·배포 설정·5장 발표자료는 완료. 사용자가 배포를 결정하면 GitHub와 Streamlit Cloud를 연결.</div>
+  </div>
+
+  <div class="todo-card">
+    <div class="todo-head">
+      <span class="todo-title">타이어 3사(넥센·한국타이어·금호타이어) 포함 여부</span>
+      <span class="todo-tag tag-low">낮음</span>
+    </div>
+    <div class="todo-desc">처음 범위 정의 시 별도 업종으로 분류해 제외했음. 샘플 보강이 필요하면 추가 검토 가능하나 2주 일정상 우선순위는 낮음.</div>
+  </div>
+
+  <!-- 5. KEY METRICS -->
+  <h2 class="section-title"><span class="num">5</span>현재 모델 성능 요약</h2>
+  <table class="metrics">
+    <tr><th>리스크지표</th><th>연간 XGBoost</th><th>직전연도 기준선</th><th>판정</th></tr>
+    <tr><td>부채비율 (로그학습)</td><td>0.554</td><td class="good">0.854</td><td>기준선 미달</td></tr>
+    <tr><td>유동비율</td><td>0.858</td><td class="good">0.913</td><td>기준선 미달</td></tr>
+    <tr><td>이자보상배율</td><td>0.240</td><td>0.286</td><td>둘 다 낮음</td></tr>
+    <tr><td>영업이익률</td><td>0.242</td><td class="good">0.514</td><td>기준선 미달</td></tr>
+    <tr><td>Z-score</td><td>0.794</td><td class="good">0.905</td><td>기준선 미달</td></tr>
+  </table>
+  <div class="metrics-note">※ 동일한 검증 표본에서 비교한 walk-forward R². 절대 성능이 높아 보여도 단순 지속성 기준선보다 낮으므로 미래 예측 우수성을 주장하지 않음.</div>
+
+  <!-- 6. MODEL VALIDATION -->
+  <h2 class="section-title"><span class="num">6</span>모델 검증 결과</h2>
+
+  <div class="validation-banner signal">
+    <strong>전체 데이터 재검증 — 기업 재무 리스크 신호 확인</strong>
+    분기 손익 변환 오류를 교정해 데이터 품질과 Z-score 신호를 복원함.
+    기업별 위험 수준과 지속성은 유의미하지만, 거시변수의 인과효과와 기준선 이상의 미래 예측력은 아직 입증되지 않음.
+  </div>
+
+  <table class="metrics">
+    <tr>
+      <th>리스크지표</th>
+      <th>연간 XGB / 기준선</th>
+      <th>교정 분기 XGB / 기준선</th>
+      <th>현재 활용 판정</th>
+    </tr>
+    <tr><td>부채비율</td><td>0.554 / 0.854</td><td>0.626 / 0.724</td><td>추이·현황 참고</td></tr>
+    <tr><td>유동비율</td><td>0.858 / 0.913</td><td class="good">0.818 / 0.793</td><td>분기 모델만 기준선 소폭 상회</td></tr>
+    <tr><td>이자보상배율</td><td>0.240 / 0.286</td><td class="bad">-0.708 / -0.716</td><td>예측 사용 보류</td></tr>
+    <tr><td>영업이익률</td><td>0.242 / 0.514</td><td>0.029 / 0.058</td><td>예측 사용 보류</td></tr>
+    <tr><td>Z-score</td><td>0.794 / 0.905</td><td>0.902 / 0.934</td><td>등급·설명 참고</td></tr>
+  </table>
+  <div class="metrics-note">표기: 동일 표본 XGBoost R² / 직전 연도·분기 값 기준선 R². 전체 데이터 walk-forward 검증 결과는 CSV와 모델 메타데이터에 저장.</div>
+
+  <div class="validation-grid">
+    <div class="validation-card">
+      <h3>✓ 연간 데이터 — 무결성과 기업 신호 확인</h3>
+      <p>125행×32열, 21개사, 기업·연도 중복 0건. 부채비율·유동비율·Z-score에서 기업별 수준과 지속성 신호가 확인됨. 자본잠식 기업의 음수 부채비율은 결측 처리하고 별도 위험 경고로 분리.</p>
+    </div>
+    <div class="validation-card">
+      <h3>✓ 분기 손익 파이프라인 — 교정 완료</h3>
+      <p>DART Q1~Q3 해당분기값을 유지하고 Q4만 연간값에서 앞선 분기를 차감하도록 수정. 기존 데이터를 역산 복원해 음수 매출이 102건→2건으로 감소했으며 492행×36열 패널을 재생성.</p>
+    </div>
+    <div class="validation-card">
+      <h3>✓ SHAP 산출물 — beeswarm 추가</h3>
+      <p>기존 평균 중요도·기업별 막대그래프에 Z-score 관측치별 beeswarm을 추가. 기업 ID 기여가 거시변수보다 큰 점을 시각적으로 확인해 모델 해석 한계를 함께 제시.</p>
+    </div>
+    <div class="validation-card">
+      <h3>△ 예측력 — 지속성 기준선 우세</h3>
+      <p>교정 분기 Z-score 모델 R²는 0.902지만 직전 분기 기준선은 0.934. 대부분 지표에서 단순 기준선이 우세하며, 분기 유동비율만 0.818로 기준선 0.793을 소폭 상회.</p>
+    </div>
+    <div class="validation-card">
+      <h3>△ 금리 연관성 — 반복 관측, 인과 아님</h3>
+      <p>Z-score↔한국금리는 교정 연간 p=0.005, 교정 분기 p=0.002. 다만 거시변수는 같은 시점의 모든 기업에 반복되고 시간 관측치가 제한적이므로 인과효과로 해석하지 않음.</p>
+    </div>
+    <div class="validation-card">
+      <h3>✓ 현재 사용 가능 범위</h3>
+      <p>21개사의 재무 추이, 현재 위험 신호, 과거·동종기업 비교, 위험등급 참고. 금리·환율 시나리오는 관측범위 내 모델 민감도로만 사용하고 미래예측·투자·신용판단에는 사용하지 않음.</p>
+    </div>
+  </div>
+
+  <!-- 7. PHASE 4 VALIDATION -->
+  <h2 class="section-title"><span class="num">7</span>리포트·API 분석 결과</h2>
+
+  <div class="validation-banner signal">
+    <strong>리포트·API 분석 판정 — 핵심 기능 통합검증 통과</strong>
+    정량 도구 → 5단 구조 리포트 → Gemini 문체 변환 → FastAPI 응답 흐름을 실제 저장 모델과 API 키로 검증함.
+    시나리오는 인과예측이 아닌 관측 범위 내 민감도라는 경고를 모든 출력에 유지함.
+  </div>
+
+  <table class="metrics">
+    <tr><th>검증 항목</th><th>결과</th><th>확인 내용</th></tr>
+    <tr><td>단위 테스트</td><td class="good">5/5 통과</td><td>현재위험·동종비교·시나리오·SHAP·5단 리포트</td></tr>
+    <tr><td>FastAPI 서버</td><td class="good">통과</td><td>/health·/companies·/analyze·/report 정상 노출</td></tr>
+    <tr><td>Swagger 문서</td><td class="good">HTTP 200</td><td>/docs 및 openapi.json 생성 확인</td></tr>
+    <tr><td>Gemini 실제 호출</td><td class="good">통과</td><td>gemini-2.5-flash, 5개 섹션·기준연도·민감도 경고 보존</td></tr>
+    <tr><td>21개 기업 입력</td><td class="good">통과</td><td>현재위험·동종비교·시나리오 직렬화 오류 없음</td></tr>
+    <tr><td>범위 밖 시나리오</td><td class="good">차단</td><td>관측 범위 밖 금리 입력에 HTTP 422 반환</td></tr>
+  </table>
+
+  <div class="validation-grid">
+    <div class="validation-card">
+      <h3>안전 샘플 — 현대모비스</h3>
+      <p>안전 등급, 경고 0건, 점검제안 1건. 동종비교 5개 지표와 SHAP 거시기여 5개가 리포트에 정상 반영됨.</p>
+    </div>
+    <div class="validation-card">
+      <h3>주의 샘플 — 한온시스템</h3>
+      <p>주의 등급, 경고 3건, 점검제안 3건. 높은 부채비율·낮은 유동비율·낮은 이자보상배율이 규칙 기반 제안과 일치함.</p>
+    </div>
+    <div class="validation-card">
+      <h3>위험 샘플 — 코다코</h3>
+      <p>위험 등급, 경고 5건, 점검제안 5건. 자본잠식·유동성·이자부담·영업적자·Z-score 위험 신호가 빠짐없이 반영됨.</p>
+    </div>
+    <div class="validation-card">
+      <h3>남은 범위</h3>
+      <p>Phase 4의 JSON·Markdown 리포트 완료 후 Phase 5에서 PDF 출력과 Streamlit 대시보드까지 구현함. 실제 Cloud 배포와 발표자료가 남아 있음.</p>
+    </div>
+  </div>
+
+  <!-- 8. PHASE 5 VALIDATION -->
+  <h2 class="section-title"><span class="num">8</span>대시보드·산출물 분석 결과</h2>
+
+  <div class="validation-banner signal">
+    <strong>대시보드·산출물 분석 판정 — 로컬 제품 기능 검증 통과</strong>
+    저장 데이터와 기존 모델을 그대로 사용해 대시보드 조회, 시나리오 민감도, 챗봇, 리포트 생성 흐름을 실제 브라우저에서 확인함.
+    Cloud 배포에 필요한 설정은 준비됐으며 외부 Git 저장소 연결과 배포 실행만 남음.
+  </div>
+
+  <table class="metrics">
+    <tr><th>검증 항목</th><th>결과</th><th>확인 내용</th></tr>
+    <tr><td>전체 단위 테스트</td><td class="good">7/7 통과</td><td>에이전트·리포트·PDF + 분기 손익 복원·재실행 안전성</td></tr>
+    <tr><td>Streamlit 서버</td><td class="good">통과</td><td>로컬 헬스체크 정상, 21개 기업 선택 가능</td></tr>
+    <tr><td>브라우저 렌더링</td><td class="good">통과</td><td>요약·추이·시나리오·동종/SHAP·챗봇·리포트 6개 탭 확인</td></tr>
+    <tr><td>시나리오 실행</td><td class="good">통과</td><td>관측범위 가드레일과 민감도 경고를 유지한 결과표 생성</td></tr>
+    <tr><td>리포트 출력</td><td class="good">통과</td><td>5단 Markdown 생성 및 Markdown·PDF 버튼 노출</td></tr>
+    <tr><td>PDF 품질</td><td class="good">통과</td><td>한글 CID 폰트 적용, 2페이지 렌더링·텍스트 추출·육안검사 완료</td></tr>
+    <tr><td>Cloud 배포 준비</td><td class="good">완료</td><td>requirements·runtime·Streamlit 설정·secrets 예시·README 준비</td></tr>
+    <tr><td>실제 외부 배포</td><td>대기</td><td>GitHub 저장소와 Streamlit Cloud 계정 연결 필요</td></tr>
+  </table>
+
+  <!-- 9. ANALYSIS ARTIFACTS -->
+  <h2 class="section-title"><span class="num">9</span>Phase별 분석 산출물</h2>
+
+  <div class="validation-grid">
+    <div class="validation-card">
+      <h3>Phase 1 — 데이터</h3>
+      <p>수집 → 분기 손익 교정 → 위험지표 계산 → 연간 패널 생성</p>
+      <a class="artifact-link" href="data/processed/panel_quarterly.parquet">분기 패널 492행</a>
+      <a class="artifact-link" href="data/processed/panel_annual_v2.parquet">연간 패널 125행</a>
+    </div>
+    <div class="validation-card">
+      <h3>Phase 2 — EDA·회귀·ML·SHAP</h3>
+      <p>시계열 → 상관·이벤트 → PanelOLS → walk-forward·기준선 → SHAP</p>
+      <a class="artifact-link" href="data/outputs/model_validation_v2.csv">연간 검증 CSV</a>
+      <a class="artifact-link" href="data/outputs/q_model_validation.csv">분기 검증 CSV</a>
+    </div>
+    <div class="validation-card">
+      <h3>Phase 3·4 — 에이전트·리포트</h3>
+      <p>위험 도구 → 시나리오·SHAP → Gemini → 5단 리포트 → PDF</p>
+      <a class="artifact-link" href="output/pdf/hyundai_mobis_risk_report.pdf">현대모비스 PDF</a>
+    </div>
+    <div class="validation-card">
+      <h3>Phase 5 — 화면·발표</h3>
+      <p>Streamlit 6개 탭 → 다운로드 → 통합검증 → 5장 발표자료</p>
+      <a class="artifact-link" href="presentation_slides.md">발표자료 Markdown</a>
+      <a class="artifact-link" href="README.md">실행·배포 README</a>
+    </div>
+  </div>
+
+  <h3 style="margin-top:22px; color:var(--navy);">연간 분석 PNG</h3>
+  <div class="artifact-grid">
+    <a class="artifact-card" href="data/outputs/01_risk_timeseries.png"><img src="data/outputs/01_risk_timeseries.png" alt="리스크지표 시계열">01 · 리스크지표 시계열</a>
+    <a class="artifact-card" href="data/outputs/02_macro_timeseries.png"><img src="data/outputs/02_macro_timeseries.png" alt="거시지표 시계열">02 · 거시경제지표 시계열</a>
+    <a class="artifact-card" href="data/outputs/03_correlation_heatmap.png"><img src="data/outputs/03_correlation_heatmap.png" alt="상관행렬">03 · 상관행렬 히트맵</a>
+    <a class="artifact-card" href="data/outputs/04_event_comparison.png"><img src="data/outputs/04_event_comparison.png" alt="이벤트 비교">04 · 코로나·금리 이벤트 비교</a>
+    <a class="artifact-card" href="data/outputs/v2_05_panel_regression_heatmap.png"><img src="data/outputs/v2_05_panel_regression_heatmap.png" alt="패널회귀">05 · 최신 패널회귀 계수</a>
+    <a class="artifact-card" href="data/outputs/v2_06_shap_importance.png"><img src="data/outputs/v2_06_shap_importance.png" alt="SHAP 중요도">06 · 최신 SHAP 중요도</a>
+    <a class="artifact-card" href="data/outputs/v2_07_shap_by_corp.png"><img src="data/outputs/v2_07_shap_by_corp.png" alt="기업별 SHAP">07 · 기업별 Z-score SHAP</a>
+    <a class="artifact-card" href="data/outputs/v2_08_shap_beeswarm_z_score.png"><img src="data/outputs/v2_08_shap_beeswarm_z_score.png" alt="SHAP beeswarm">08 · Z-score SHAP beeswarm</a>
+  </div>
+
+  <h3 style="color:var(--navy);">분기 분석 PNG 및 이전 버전</h3>
+  <div>
+    <a class="artifact-link" href="data/outputs/q01_avg_risk_timeseries.png">분기 평균 위험 추이</a>
+    <a class="artifact-link" href="data/outputs/q02_correlation_heatmap.png">분기 상관행렬</a>
+    <a class="artifact-link" href="data/outputs/q03_regression_heatmap.png">분기 패널회귀</a>
+    <a class="artifact-link" href="data/outputs/q04_shap_importance.png">분기 SHAP 중요도</a>
+    <a class="artifact-link" href="data/outputs/q05_shap_by_corp.png">분기 기업별 SHAP</a>
+    <a class="artifact-link" href="data/outputs/05_panel_regression_heatmap.png">초기 패널회귀</a>
+    <a class="artifact-link" href="data/outputs/06_shap_importance.png">초기 SHAP 중요도</a>
+    <a class="artifact-link" href="data/outputs/07_shap_by_corp.png">초기 기업별 SHAP</a>
+  </div>
+
+  <h3 style="margin-top:24px; color:var(--navy);">CSV 샘플 — 파일별 최대 10행</h3>
+
+  <div class="csv-block">
+    <h3><a href="data/outputs/model_validation_v2.csv">model_validation_v2.csv</a> — 최신 연간 모델 검증 5행</h3>
+    <table class="csv-table"><thead><tr><th>target</th><th>label</th><th>model_mae</th><th>model_r2</th><th>동일표본 R²</th><th>기준선 R²</th><th>검증 n</th><th>기준선 n</th></tr></thead><tbody>
+      <tr><td>debt_ratio</td><td>부채비율</td><td>64.4766</td><td>0.8125</td><td>0.5545</td><td>0.8544</td><td>41</td><td>40</td></tr>
+      <tr><td>current_ratio</td><td>유동비율</td><td>26.3235</td><td>0.8577</td><td>0.8577</td><td>0.9132</td><td>42</td><td>42</td></tr>
+      <tr><td>icr</td><td>이자보상배율</td><td>2.2884</td><td>0.2401</td><td>0.2401</td><td>0.2861</td><td>42</td><td>42</td></tr>
+      <tr><td>op_margin</td><td>영업이익률</td><td>2.6931</td><td>0.2416</td><td>0.2420</td><td>0.5145</td><td>38</td><td>37</td></tr>
+      <tr><td>z_score</td><td>Z-score</td><td>0.5729</td><td>0.7934</td><td>0.7938</td><td>0.9046</td><td>40</td><td>39</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="csv-block">
+    <h3><a href="data/outputs/q_model_validation.csv">q_model_validation.csv</a> — 교정 분기 모델 검증 5행</h3>
+    <table class="csv-table"><thead><tr><th>target</th><th>label</th><th>model_mae</th><th>model_r2</th><th>동일표본 R²</th><th>기준선 R²</th><th>검증 n</th><th>기준선 n</th></tr></thead><tbody>
+      <tr><td>debt_ratio</td><td>부채비율</td><td>70.0265</td><td>0.5616</td><td>0.6264</td><td>0.7237</td><td>310</td><td>307</td></tr>
+      <tr><td>current_ratio</td><td>유동비율</td><td>20.0629</td><td>0.8182</td><td>0.8182</td><td>0.7931</td><td>313</td><td>312</td></tr>
+      <tr><td>icr</td><td>이자보상배율</td><td>5.1061</td><td>-0.7055</td><td>-0.7077</td><td>-0.7162</td><td>310</td><td>306</td></tr>
+      <tr><td>op_margin</td><td>영업이익률</td><td>19.1759</td><td>0.0300</td><td>0.0291</td><td>0.0576</td><td>270</td><td>264</td></tr>
+      <tr><td>z_score</td><td>Z-score</td><td>0.3335</td><td>0.9064</td><td>0.9024</td><td>0.9336</td><td>278</td><td>270</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="csv-block">
+    <h3><a href="data/outputs/panel_regression_results_v2.csv">panel_regression_results_v2.csv</a> — 최신 연간 회귀 첫 10행</h3>
+    <table class="csv-table"><thead><tr><th>리스크지표</th><th>거시변수</th><th>β계수</th><th>p값</th><th>유의성</th></tr></thead><tbody>
+      <tr><td>부채비율</td><td>한국금리</td><td>-40.3941</td><td>0.259</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>환율</td><td>0.2043</td><td>0.702</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>PPI</td><td>0.1382</td><td>0.878</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>유가</td><td>2.3321</td><td>0.232</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>한국금리</td><td>-10.2067</td><td>0.238</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>환율</td><td>0.1368</td><td>0.184</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>PPI</td><td>0.2598</td><td>0.503</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>유가</td><td>0.3273</td><td>0.337</td><td>-</td></tr>
+      <tr><td>이자보상배율</td><td>한국금리</td><td>0.7775</td><td>0.075</td><td>*</td></tr>
+      <tr><td>이자보상배율</td><td>환율</td><td>-0.0083</td><td>0.160</td><td>-</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="csv-block">
+    <h3><a href="data/outputs/q_panel_regression_results.csv">q_panel_regression_results.csv</a> — 교정 분기 회귀 첫 10행</h3>
+    <table class="csv-table"><thead><tr><th>리스크지표</th><th>거시변수</th><th>β계수</th><th>p값</th><th>유의성</th></tr></thead><tbody>
+      <tr><td>부채비율</td><td>한국금리</td><td>3.1682</td><td>0.830</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>환율</td><td>-0.3135</td><td>0.219</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>PPI</td><td>1.4241</td><td>0.638</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>유가</td><td>-1.7426</td><td>0.624</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>한국금리</td><td>-5.1693</td><td>0.222</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>환율</td><td>0.0633</td><td>0.007</td><td>***</td></tr>
+      <tr><td>유동비율</td><td>PPI</td><td>0.2762</td><td>0.489</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>유가</td><td>0.0363</td><td>0.931</td><td>-</td></tr>
+      <tr><td>이자보상배율</td><td>한국금리</td><td>0.3896</td><td>0.595</td><td>-</td></tr>
+      <tr><td>이자보상배율</td><td>환율</td><td>-0.0255</td><td>0.040</td><td>**</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="csv-block">
+    <h3><a href="data/outputs/panel_regression_results.csv">panel_regression_results.csv</a> — 초기 연간 회귀 첫 10행</h3>
+    <table class="csv-table"><thead><tr><th>리스크지표</th><th>거시변수</th><th>β계수</th><th>p값</th><th>유의성</th></tr></thead><tbody>
+      <tr><td>부채비율</td><td>한국금리</td><td>-15.9724</td><td>0.383</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>환율</td><td>-0.3638</td><td>0.302</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>PPI</td><td>2.4069</td><td>0.325</td><td>-</td></tr>
+      <tr><td>부채비율</td><td>유가</td><td>-2.4272</td><td>0.273</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>한국금리</td><td>-3.6124</td><td>0.328</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>환율</td><td>-0.0210</td><td>0.651</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>PPI</td><td>-0.1166</td><td>0.628</td><td>-</td></tr>
+      <tr><td>유동비율</td><td>유가</td><td>0.4459</td><td>0.028</td><td>**</td></tr>
+      <tr><td>이자보상배율</td><td>한국금리</td><td>0.2670</td><td>0.585</td><td>-</td></tr>
+      <tr><td>이자보상배율</td><td>환율</td><td>-0.0017</td><td>0.657</td><td>-</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="footer-note">
+    자동차 부품업계 리스크 분석 에이전트 프로젝트 · 팀 현황 공유 리포트<br>
+    21개 기업 · 2019~2024 · 무료 API(DART·ECOS·FRED·Gemini) 기반
+  </div>
+
+</div>
+</body>
+</html>

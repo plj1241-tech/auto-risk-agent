@@ -1,0 +1,8 @@
+.env 
+data/raw/ 
+__pycache__/
+*.pkl
+!models/risk_predictor_v2.pkl
+.cache/
+tmp/matplotlib/
+.streamlit/secrets.toml
