@@ -9,7 +9,7 @@ ECOS_KEY = os.getenv("ECOS_API_KEY")
 FRED_KEY = os.getenv("FRED_API_KEY")
 
 def fetch_ecos_daily_quarterly(stat_code, item_code, label,
-                                start="20190101", end="20241231"):
+                                start="20190101", end="20251231"):
     """일간 ECOS 데이터 → 분기 평균"""
     url = (
         f"https://ecos.bok.or.kr/api/StatisticSearch/{ECOS_KEY}/json/kr"
@@ -38,7 +38,7 @@ def fetch_ecos_daily_quarterly(stat_code, item_code, label,
     return quarterly
 
 def fetch_ecos_annual_to_quarterly(stat_code, item_code, label,
-                                   start="2019", end="2024"):
+                                   start="2019", end="2025"):
     """연간 ECOS 데이터를 4분기에 동일값 적용 (기준금리처럼 자주 안변하는 지표)"""
     url = (
         f"https://ecos.bok.or.kr/api/StatisticSearch/{ECOS_KEY}/json/kr"
@@ -58,7 +58,7 @@ def fetch_ecos_annual_to_quarterly(stat_code, item_code, label,
             records.append({"year": year, "quarter": q, label: val})
     return pd.DataFrame(records)
 
-def fetch_fred_quarterly(series_id, label, start="2019-01-01", end="2024-12-31"):
+def fetch_fred_quarterly(series_id, label, start="2019-01-01", end="2025-12-31"):
     fred = fredapi.Fred(api_key=FRED_KEY)
     s = fred.get_series(series_id, observation_start=start, observation_end=end)
     s.index = pd.to_datetime(s.index)
@@ -85,7 +85,7 @@ def collect_macro_quarterly():
         macro = macro.merge(df, on=["year","quarter"], how="outer")
 
     macro = macro.sort_values(["year","quarter"]).reset_index(drop=True)
-    macro = macro[(macro["year"]>=2019) & (macro["year"]<=2024)]
+    macro = macro[(macro["year"]>=2019) & (macro["year"]<=2025)]
     macro = macro.interpolate(method="linear").ffill().bfill()
 
     os.makedirs("data/raw/macro", exist_ok=True)

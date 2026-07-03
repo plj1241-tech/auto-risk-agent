@@ -71,6 +71,8 @@ with st.sidebar:
     st.markdown("**모델 사용 범위**")
     st.caption("현재위험·과거추이·동종비교: 사용 가능")
     st.caption("시나리오: 관측 범위 내 민감도만 제공")
+    if available_years:
+        st.caption(f"데이터 기간: {available_years[-1]}–{available_years[0]}")
 
 current = agent.store.company_row(corp_name, int(selected_year))
 current_risk = get_current_risk(corp_name, int(selected_year))
@@ -91,13 +93,9 @@ st.markdown(
             <div class="hero-eyebrow">Auto Risk Agent</div>
             <h1 class="hero-title">자동차 부품업계 리스크를 더 빠르고 단정하게 파악하세요</h1>
             <p class="hero-lead">DART 재무 데이터와 거시 지표를 통합 분석해 기업별 위험, 시나리오 민감도, 동종 업계 비교를 한곳에서 제공합니다.</p>
-            <div class="hero-actions">
-                <a class="hero-cta hero-cta-primary" href="#overview">분석 시작</a>
-                <a class="hero-cta hero-cta-secondary" href="#report">리포트 보기</a>
-            </div>
             <div class="hero-stats">
                 <div class="hero-stat"><span>21개</span><small>기업 분석</small></div>
-                <div class="hero-stat"><span>2019–2024</span><small>데이터 기간</small></div>
+                <div class="hero-stat"><span>{available_years[-1]}–{available_years[0]}</span><small>데이터 기간</small></div>
                 <div class="hero-stat"><span>재무+거시</span><small>통합 분석</small></div>
             </div>
         </div>
@@ -115,7 +113,11 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
+# Update hero stats with actual available years range
+st.markdown(
+    f"<div class=\"hero-stats-annotation\">데이터 기간: {available_years[-1]}–{available_years[0]}</div>",
+    unsafe_allow_html=True,
+)
 # ── 현재 거시지표값 (챗봇 컨텍스트용) ──────────────────
 current_rate    = float(current.get("base_rate_kr", 3.0))
 current_usdkrw  = float(current.get("usd_krw", 1300.0))
@@ -127,8 +129,8 @@ for column, (name, label) in zip(metric_columns, RISK_LABELS.items()):
     suffix = "%" if name in {"debt_ratio", "current_ratio", "op_margin"} else ""
     column.metric(label, "N/A" if value is None else f"{value:,.2f}{suffix}")
 
-overview_tab, trend_tab, scenario_tab, peer_tab, chat_tab, report_tab = st.tabs(
-    ["요약", "추이", "시나리오", "동종·SHAP", "챗봇", "리포트"]
+overview_tab, scenario_tab, peer_tab, report_tab = st.tabs(
+    ["요약 및 추이", "시나리오", "동종·SHAP", "리포트"]
 )
 
 with overview_tab:
@@ -144,6 +146,29 @@ with overview_tab:
             .properties(height=330)
         )
         st.altair_chart(chart, use_container_width=True)
+        st.markdown("---")
+        st.subheader("리스크지표와 거시변수 오버레이")
+        col1, col2 = st.columns(2)
+        risk_overlay = col1.selectbox("리스크", list(RISK_LABELS), format_func=RISK_LABELS.get, key="overlay_risk")
+        macro_options = ["base_rate_kr", "usd_krw", "ppi_us", "wti_oil", "iron_ore_price"]
+        macro_overlay = col2.selectbox("거시변수", macro_options, format_func=FEATURE_LABELS.get)
+        overlay = panel[panel.corp_name.eq(corp_name)][["year", risk_overlay, macro_overlay]].dropna().copy()
+        for name in [risk_overlay, macro_overlay]:
+            first = overlay[name].iloc[0]
+            overlay[FEATURE_LABELS.get(name, RISK_LABELS.get(name, name))] = overlay[name] / first * 100 if first else overlay[name]
+        melted = overlay.melt(
+            id_vars="year",
+            value_vars=[RISK_LABELS[risk_overlay], FEATURE_LABELS[macro_overlay]],
+            var_name="구분",
+            value_name="지수",
+        )
+        overlay_chart = (
+            alt.Chart(melted)
+            .mark_line(point=True, strokeWidth=3)
+            .encode(x=alt.X("year:O", title="연도"), y=alt.Y("지수:Q", title="최초연도=100"), color="구분:N", tooltip=["year", "구분", "지수"])
+            .properties(height=420)
+        )
+        st.altair_chart(overlay_chart, use_container_width=True)
     with right:
         st.subheader("데이터 품질")
         quality = current_risk["data_quality"]
@@ -151,30 +176,6 @@ with overview_tab:
         st.write(f"- 완전 연도: {'예' if quality['complete_year'] else '아니오'}")
         st.write(f"- 결측 지표: {', '.join(quality['missing_metrics']) or '없음'}")
         st.info("현재 등급과 수치는 공시 기반 분석 참고자료이며 투자·신용의견이 아닙니다.")
-
-with trend_tab:
-    st.subheader("리스크지표와 거시변수 오버레이")
-    col1, col2 = st.columns(2)
-    risk_overlay = col1.selectbox("리스크", list(RISK_LABELS), format_func=RISK_LABELS.get, key="overlay_risk")
-    macro_options = ["base_rate_kr", "usd_krw", "ppi_us", "wti_oil", "iron_ore_price"]
-    macro_overlay = col2.selectbox("거시변수", macro_options, format_func=FEATURE_LABELS.get)
-    overlay = panel[panel.corp_name.eq(corp_name)][["year", risk_overlay, macro_overlay]].dropna().copy()
-    for name in [risk_overlay, macro_overlay]:
-        first = overlay[name].iloc[0]
-        overlay[FEATURE_LABELS.get(name, RISK_LABELS.get(name, name))] = overlay[name] / first * 100 if first else overlay[name]
-    melted = overlay.melt(
-        id_vars="year",
-        value_vars=[RISK_LABELS[risk_overlay], FEATURE_LABELS[macro_overlay]],
-        var_name="구분",
-        value_name="지수",
-    )
-    overlay_chart = (
-        alt.Chart(melted)
-        .mark_line(point=True, strokeWidth=3)
-        .encode(x=alt.X("year:O", title="연도"), y=alt.Y("지수:Q", title="최초연도=100"), color="구분:N", tooltip=["year", "구분", "지수"])
-        .properties(height=420)
-    )
-    st.altair_chart(overlay_chart, use_container_width=True)
 
 with scenario_tab:
     st.subheader("거시변수 시나리오 민감도")
@@ -268,52 +269,6 @@ with peer_tab:
         st.altair_chart(shap_chart, use_container_width=True)
         st.caption(shap_result["validation_note"])
 
-with chat_tab:
-    st.subheader("리스크 분석 챗봇")
-
-    # ── 챗봇 컨텍스트 힌트 표시 ──────────────────────────
-    st.caption(
-        f"현재 컨텍스트: **{corp_name}** · **{selected_year}년** · "
-        f"기준금리 {current_rate:.2f}% · 환율 {current_usdkrw:.0f}원"
-    )
-
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    # 기업·연도가 바뀌면 대화 초기화
-    ctx_key = f"{corp_name}_{selected_year}"
-    if st.session_state.get("chat_ctx") != ctx_key:
-        st.session_state.messages = []
-        st.session_state["chat_ctx"] = ctx_key
-
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-    prompt = st.chat_input(f"{corp_name}에 대해 질문하세요")
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-        with st.chat_message("assistant"):
-            with st.spinner("분석 중..."):
-                # ── 핵심 수정: selected_year + 현재 거시값 전달 ──
-                result = agent.analyze(
-                    prompt,
-                    corp_name=corp_name,
-                    base_year=int(selected_year),
-                    current_macro={
-                        "base_rate_kr": current_rate,
-                        "usd_krw": current_usdkrw,
-                        "wti_oil": current_wti,
-                    },
-                    use_llm=use_gemini,
-                )
-            st.markdown(result["answer"])
-            with st.expander("사용 도구"):
-                st.json(result.get("tool_trace", []))
-        st.session_state.messages.append({"role": "assistant", "content": result["answer"]})
-
 with report_tab:
     st.subheader("애널리스트 리포트")
     include_scenario = st.checkbox("현재 시나리오 결과 포함", value=bool(st.session_state.get("scenario_input")))
@@ -325,8 +280,198 @@ with report_tab:
             st.session_state["report"] = report
     report = st.session_state.get("report")
     if report and report["corp_name"] == corp_name:
-        rendered = report.get("llm_markdown") or report["markdown"]
-        st.markdown(rendered)
+        sections = report.get("sections", {})
+        current = sections.get("summary", {})
+        scenario_result = sections.get("scenario")
+        causes = sections.get("causes", {})
+        peers = sections.get("peer_comparison", {})
+        actions = sections.get("actions", [])
+
+        st.markdown("### 1. 핵심 요약")
+        if current:
+            risk_flags = current.get("risk_flags", []) or []
+            flags_html = "".join(
+                f"<span class='summary-badge'>{flag}</span>" for flag in risk_flags
+            ) or "<span class='summary-badge summary-badge-neutral'>없음</span>"
+            st.markdown(
+                f"""
+                <div class='report-summary-panel'>
+                    <div class='report-summary-item'>
+                        <div class='report-summary-label'>Z-score 등급</div>
+                        <div class='report-summary-value'>{current.get('z_grade', 'N/A')}</div>
+                    </div>
+                    <div class='report-summary-item'>
+                        <div class='report-summary-label'>주요 경고</div>
+                        <div class='report-summary-badges'>{flags_html}</div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            metric_cols = st.columns(4)
+            metric_names = ["debt_ratio", "current_ratio", "op_margin", "icr"]
+            metric_labels = [RISK_LABELS.get(name, name) for name in metric_names]
+            metric_values = [current["metrics"].get(name) for name in metric_names]
+            metric_suffixes = ["%", "", "%", ""]
+            for col, label, value, suffix in zip(metric_cols, metric_labels, metric_values, metric_suffixes):
+                col.metric(label, "N/A" if value is None else f"{value:,.2f}{suffix}")
+
+            summary_rows = [
+                {"지표": label, "값": float(value)}
+                for label, value in zip(metric_labels, metric_values)
+                if value is not None
+            ]
+            if summary_rows:
+                summary_chart = (
+                    alt.Chart(pd.DataFrame(summary_rows))
+                    .mark_bar(color="#2563eb")
+                    .encode(
+                        x=alt.X("값:Q", title="값"),
+                        y=alt.Y("지표:N", sort="-x", title=""),
+                        tooltip=["지표", "값"],
+                    )
+                    .properties(height=260)
+                )
+                st.altair_chart(summary_chart, use_container_width=True)
+        else:
+            st.info("리포트 요약 데이터를 불러오는 중입니다.")
+
+        st.markdown("### 2. 시나리오 변수 및 결과")
+        if scenario_result:
+            applied = scenario_result.get("applied_scenario", {})
+            if applied:
+                st.markdown("#### 적용된 시나리오 변수")
+                applied_chart_rows = [
+                    {"변수": item["label"], "종류": "기준", "값": item["before"]}
+                    for item in applied.values()
+                ] + [
+                    {"변수": item["label"], "종류": "시나리오", "값": item["after"]}
+                    for item in applied.values()
+                ]
+                applied_chart = (
+                    alt.Chart(pd.DataFrame(applied_chart_rows))
+                    .mark_bar()
+                    .encode(
+                        x=alt.X("값:Q", title="값"),
+                        y=alt.Y("변수:N", sort="-x", title=""),
+                        color=alt.Color("종류:N", scale=alt.Scale(range=["#2563eb", "#10b981"])),
+                        tooltip=["변수", "종류", "값"],
+                    )
+                    .properties(height=320)
+                )
+                st.altair_chart(applied_chart, use_container_width=True)
+            else:
+                st.info("적용된 시나리오 변수가 없습니다.")
+
+            if scenario_result.get("predictions"):
+                max_name, max_item = max(
+                    scenario_result["predictions"].items(),
+                    key=lambda pair: abs(pair[1]["delta"]),
+                )
+                summary_cols = st.columns(len(scenario_result["predictions"]))
+                for col, (target, item) in zip(summary_cols, scenario_result["predictions"].items()):
+                    direction = "positive" if item["delta"] > 0 else "negative" if item["delta"] < 0 else "neutral"
+                    highlight = " scenario-card-highlight" if target == max_name else ""
+                    delta_pct = item.get("delta_pct")
+                    delta_label = f"{item['delta']:+.2f}"
+                    if delta_pct is not None:
+                        delta_label += f" ({delta_pct:+.1f}%)"
+                    col.markdown(
+                        f"""
+                        <div class="scenario-card scenario-card-{direction}{highlight}">
+                            <div class="scenario-card-label">{item['label']}</div>
+                            <div class="scenario-card-value">{item['scenario']:.2f}</div>
+                            <div class="scenario-card-delta">{delta_label}</div>
+                            <div class="scenario-card-subtitle">기준 {item['baseline']:.2f} → 시나리오 {item['scenario']:.2f}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                scenario_chart_rows = [
+                    {"지표": item["label"], "종류": "기준", "값": item["baseline"]}
+                    for item in scenario_result["predictions"].values()
+                ] + [
+                    {"지표": item["label"], "종류": "시나리오", "값": item["scenario"]}
+                    for item in scenario_result["predictions"].values()
+                ]
+                if scenario_chart_rows:
+                    scenario_chart = (
+                        alt.Chart(pd.DataFrame(scenario_chart_rows))
+                        .mark_bar()
+                        .encode(
+                            x=alt.X("값:Q", title="값"),
+                            y=alt.Y("지표:N", sort="-x", title=""),
+                            color=alt.Color("종류:N", scale=alt.Scale(range=["#2563eb", "#10b981"])),
+                            tooltip=["지표", "종류", "값"],
+                        )
+                        .properties(height=320)
+                    )
+                    st.altair_chart(scenario_chart, use_container_width=True)
+            else:
+                st.info("현재 선택된 시나리오 예측 결과가 없습니다.")
+        else:
+            st.info("현재 선택된 시나리오 결과가 없습니다.")
+
+        if causes.get("top_macro_effects"):
+            st.markdown("### 3. 원인 분석 (SHAP)")
+            cause_df = pd.DataFrame(causes["top_macro_effects"])
+            cause_chart = (
+                alt.Chart(cause_df)
+                .mark_bar(color="#185FA5")
+                .encode(
+                    x=alt.X("shap_value:Q", title="SHAP 값"),
+                    y=alt.Y("label:N", sort="-x", title=""),
+                    tooltip=["label", "feature_value", "shap_value"],
+                )
+                .properties(height=320)
+            )
+            st.altair_chart(cause_chart, use_container_width=True)
+
+        if peers.get("comparisons"):
+            st.markdown("### 4. 동종업계 비교")
+            peer_rows = [
+                {
+                    "지표": RISK_LABELS.get(name, name),
+                    "종류": "기업값",
+                    "값": item["value"],
+                    "순위": f"{item['health_rank']}/{item['peer_count']}",
+                }
+                for name, item in peers["comparisons"].items()
+                if item
+            ] + [
+                {
+                    "지표": RISK_LABELS.get(name, name),
+                    "종류": "중앙값",
+                    "값": item["peer_median"],
+                    "순위": f"{item['health_rank']}/{item['peer_count']}",
+                }
+                for name, item in peers["comparisons"].items()
+                if item
+            ]
+            if peer_rows:
+                peer_chart = (
+                    alt.Chart(pd.DataFrame(peer_rows))
+                    .mark_bar()
+                    .encode(
+                        x=alt.X("값:Q", title="값"),
+                        y=alt.Y("지표:N", sort="-x", title=""),
+                        color=alt.Color("종류:N", scale=alt.Scale(range=["#2563eb", "#f59e0b"])),
+                        tooltip=["지표", "종류", "값", "순위"],
+                    )
+                    .properties(height=360)
+                )
+                st.altair_chart(peer_chart, use_container_width=True)
+
+        if actions:
+            st.markdown("### 5. 점검 제안")
+            for action in actions:
+                st.write(f"- {action}")
+
+        with st.expander("원문 리포트 (Markdown)"):
+            st.markdown(report["markdown"])
+
         pdf_bytes = generate_pdf(report)
         left, right = st.columns(2)
         left.download_button("Markdown 다운로드", report["markdown"].encode("utf-8"), file_name=f"{corp_name}_risk_report.md", mime="text/markdown", use_container_width=True)

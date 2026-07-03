@@ -135,7 +135,7 @@ def normalize_quarterly_flows(df: pd.DataFrame) -> pd.DataFrame:
 
 def collect_all(years=None, companies=None):
     if years is None:
-        years = list(range(2019, 2025))
+        years = list(range(2019, 2026))
     if companies is None:
         companies = COMPANIES
 

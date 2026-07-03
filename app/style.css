@@ -275,6 +275,58 @@ section > div[data-testid="stVerticalBlock"] > div + div {
     box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.14);
 }
 
+.report-summary-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    margin: 1.5rem 0;
+}
+
+.report-summary-item {
+    padding: 1rem;
+    border-radius: 1rem;
+    background: #ffffff;
+    border: 1px solid #dbeafe;
+}
+
+.report-summary-label {
+    color: #475569;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.report-summary-value {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #1d4ed8;
+}
+
+.report-summary-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.summary-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+.summary-badge-neutral {
+    background: #f8fafc;
+    color: #475569;
+}
+
 .hero-shell {
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
